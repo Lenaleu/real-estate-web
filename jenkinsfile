@@ -1,0 +1,25 @@
+node('appserver')
+{
+stage('Cloning Git') {
+    /* Make sure we have a repo to checkout */
+    checkout scm
+}
+
+stage('Build-and-Tag') {
+    /* Build image and  
+    |   * This is synonymous to docker build on the command line*/
+    app = docker.build('grimleng/real-estate-web')
+}
+stage('Post-to-dockerhub')
+{
+    docker.withRegistry('https://registry.hub.docker.com', 'dockerhubcreds')
+    {
+        app.push('latest')
+}
+}
+stage('Deploy')
+{
+    sh "docker-compose down"
+    sh "docker-compose up -d"
+}
+}
